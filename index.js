@@ -61,6 +61,45 @@
         ct
       )
     },
+
+    generateKeypair() {
+      return window.crypto.subtle.generateKey(
+        {
+          name: 'RSA-OAEP',
+          modulusLength: 2048,
+          publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+          hash: { name: 'SHA-256' },
+        },
+        true, // make key extrctable
+        ['encrypt', 'decrypt', 'wrapKey', 'unwrapKey']
+      )
+    },
+
+    wrapKey(key, publicKey) {
+      return window.crypto.subtle.wrapKey('raw', key, publicKey, {
+        name: 'RSA-OAEP',
+        modulusLength: 2048,
+        publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+        hash: { name: 'SHA-256' },
+      })
+    },
+
+    unwrapKey(wrapped, privateKey) {
+      return window.crypto.subtle.unwrapKey(
+        'raw',
+        wrapped,
+        privateKey,
+        {
+          name: 'RSA-OAEP',
+          modulusLength: 2048,
+          publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+          hash: { name: 'SHA-256' },
+        },
+        { name: 'AES-GCM', length: 256 },
+        true,
+        ['encrypt', 'decrypt']
+      )
+    },
   }
 
   return exports
