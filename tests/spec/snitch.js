@@ -59,4 +59,12 @@ describe('Player', () => {
     expect(new TextDecoder('utf-8').decode(dt)).toEqual(pt)
     done()
   })
+
+  it('can generate an AES 256-bit key from a passphrase using PBKDF2', async done => {
+    const key = await snitch.deriveKeyFromPassphrase('Password', 'salt')
+    const exported = await window.crypto.subtle.exportKey('jwk', key)
+    expect(exported.alg).toEqual('A256GCM')
+    expect(exported.k).toEqual('uSaTpRqjQPQx4YZqiIHcwruFA2De-5U6Q22xXSvqLZM')
+    done()
+  })
 })

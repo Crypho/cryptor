@@ -100,6 +100,40 @@
         ['encrypt', 'decrypt']
       )
     },
+
+    deriveKeyFromPassphrase(passphrase, salt) {
+      if (typeof passphrase === 'string') {
+        passphrase = new TextEncoder('utf-8').encode(passphrase)
+      }
+      if (typeof salt === 'string') {
+        salt = new TextEncoder('utf-8').encode(salt)
+      }
+
+      return window.crypto.subtle
+        .importKey(
+          'raw',
+          passphrase,
+          {
+            name: 'PBKDF2',
+          },
+          false,
+          ['deriveKey']
+        )
+        .then(baseKey =>
+          window.crypto.subtle.deriveKey(
+            {
+              name: 'PBKDF2',
+              salt,
+              iterations: 1000,
+              hash: { name: 'SHA-256' },
+            },
+            baseKey,
+            { name: 'AES-GCM', length: 256 },
+            true,
+            ['encrypt', 'decrypt']
+          )
+        )
+    },
   }
 
   return exports
