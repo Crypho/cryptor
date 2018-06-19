@@ -7,7 +7,7 @@
     module.exports = factory()
   } else {
     // Browser globals (root is window)
-    root.snitch = factory()
+    root.cryptor = factory()
   }
 })(this, () => {
   const exports = {

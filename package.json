@@ -1,5 +1,5 @@
 {
-  "name": "snitch",
+  "name": "cryptor",
   "version": "1.0.0",
   "description": "Crypto helpers",
   "main": "index.js",

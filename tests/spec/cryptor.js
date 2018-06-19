@@ -1,16 +1,12 @@
-describe('Player', () => {
-  let snitch
+describe('cryptor', () => {
+  let cryptor
 
   beforeEach(() => {
-    snitch = window.snitch
-  })
-
-  it('should define a namespace', () => {
-    expect(window.snitch).toBeDefined()
+    cryptor = window.cryptor
   })
 
   it('can generate an AES GCM key', done => {
-    snitch.generateSymmetricKey().then(key => {
+    cryptor.generateSymmetricKey().then(key => {
       expect(key.algorithm.name).toEqual('AES-GCM')
       expect(key.algorithm.length).toEqual(256)
       expect(key.extractable).toBeTruthy()
@@ -20,9 +16,9 @@ describe('Player', () => {
 
   it('can encrypt/decrypt utf8 strings using AES-GCM', async done => {
     const pt = 'Hello world'
-    const key = await snitch.generateSymmetricKey()
-    const data = await snitch.encryptSymmetric(pt, key)
-    const dt = await snitch.decryptSymmetric(
+    const key = await cryptor.generateSymmetricKey()
+    const data = await cryptor.encryptSymmetric(pt, key)
+    const dt = await cryptor.decryptSymmetric(
       data.ct,
       key,
       data.iv,
@@ -33,7 +29,7 @@ describe('Player', () => {
   })
 
   it('can generate an RSA-OAEP key', done => {
-    snitch.generateKeypair().then(keyPair => {
+    cryptor.generateKeypair().then(keyPair => {
       const { publicKey, privateKey } = keyPair
       expect(publicKey.algorithm.name).toEqual('RSA-OAEP')
       expect(publicKey.algorithm.modulusLength).toEqual(2048)
@@ -45,12 +41,12 @@ describe('Player', () => {
 
   it('can wrap/unwrap an AES-GCM key using RSA-OAEP', async done => {
     const pt = 'Hello world'
-    const key = await snitch.generateSymmetricKey()
-    const data = await snitch.encryptSymmetric(pt, key)
-    const keyPair = await snitch.generateKeypair()
-    const wrapped = await snitch.wrapKey(key, keyPair.publicKey)
-    const unwrapped = await snitch.unwrapKey(wrapped, keyPair.privateKey)
-    const dt = await snitch.decryptSymmetric(
+    const key = await cryptor.generateSymmetricKey()
+    const data = await cryptor.encryptSymmetric(pt, key)
+    const keyPair = await cryptor.generateKeypair()
+    const wrapped = await cryptor.wrapKey(key, keyPair.publicKey)
+    const unwrapped = await cryptor.unwrapKey(wrapped, keyPair.privateKey)
+    const dt = await cryptor.decryptSymmetric(
       data.ct,
       unwrapped,
       data.iv,
@@ -61,7 +57,7 @@ describe('Player', () => {
   })
 
   it('can generate an AES 256-bit key from a passphrase using PBKDF2', async done => {
-    const key = await snitch.deriveKeyFromPassphrase('Password', 'salt')
+    const key = await cryptor.deriveKeyFromPassphrase('Password', 'salt')
     const exported = await window.crypto.subtle.exportKey('jwk', key)
     expect(exported.alg).toEqual('A256GCM')
     expect(exported.k).toEqual('uSaTpRqjQPQx4YZqiIHcwruFA2De-5U6Q22xXSvqLZM')
