@@ -10,9 +10,11 @@
     root.cryptor = factory()
   }
 })(this, () => {
+  const crypto = window.crypto.subtle
+
   const exports = {
     generateSymmetricKey() {
-      return window.crypto.subtle.generateKey(
+      return crypto.generateKey(
         {
           name: 'AES-GCM',
           length: 256,
@@ -29,7 +31,7 @@
       }
       const iv = window.crypto.getRandomValues(new Uint8Array(12))
       const additionalData = window.crypto.getRandomValues(new Uint8Array(12))
-      return window.crypto.subtle
+      return crypto
         .encrypt(
           {
             name: 'AES-GCM',
@@ -50,7 +52,7 @@
     },
 
     decryptSymmetric(ct, key, iv, additionalData) {
-      return window.crypto.subtle.decrypt(
+      return crypto.decrypt(
         {
           name: 'AES-GCM',
           iv,
@@ -63,7 +65,7 @@
     },
 
     generateKeypair() {
-      return window.crypto.subtle.generateKey(
+      return crypto.generateKey(
         {
           name: 'RSA-OAEP',
           modulusLength: 2048,
@@ -71,12 +73,12 @@
           hash: { name: 'SHA-256' },
         },
         true, // make key extrctable
-        ['encrypt', 'decrypt', 'wrapKey', 'unwrapKey']
+        ['wrapKey', 'unwrapKey']
       )
     },
 
     wrapKey(key, publicKey) {
-      return window.crypto.subtle.wrapKey('raw', key, publicKey, {
+      return crypto.wrapKey('raw', key, publicKey, {
         name: 'RSA-OAEP',
         modulusLength: 2048,
         publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
@@ -85,7 +87,7 @@
     },
 
     unwrapKey(wrapped, privateKey) {
-      return window.crypto.subtle.unwrapKey(
+      return crypto.unwrapKey(
         'raw',
         wrapped,
         privateKey,
@@ -109,7 +111,7 @@
         salt = new TextEncoder('utf-8').encode(salt)
       }
 
-      return window.crypto.subtle
+      return crypto
         .importKey(
           'raw',
           passphrase,
@@ -120,7 +122,7 @@
           ['deriveKey']
         )
         .then(baseKey =>
-          window.crypto.subtle.deriveKey(
+          crypto.deriveKey(
             {
               name: 'PBKDF2',
               salt,
@@ -134,7 +136,90 @@
           )
         )
     },
+
+    uInt8ArrayToB64(array) {
+      return btoa(
+        Array.from(array)
+          .map(byte => String.fromCharCode(byte))
+          .join('')
+      )
+    },
+
+    b64ToUint8Array(b64) {
+      return new Uint8Array(
+        atob(b64)
+          .split('')
+          .map(c => c.charCodeAt(0))
+      )
+    },
   }
+
+  let Cryptor = function() {
+    return this
+  }
+
+  Cryptor.prototype = {
+    async generate(passphrase, salt) {
+      this.keyPair = await exports.generateKeypair()
+      this.masterKey = await exports.deriveKeyFromPassphrase(passphrase, salt)
+    },
+
+    async toJSON() {
+      let privateKeyEncrypted = await crypto.exportKey(
+        'pkcs8',
+        this.keyPair.privateKey
+      )
+      privateKeyEncrypted = await exports.encryptSymmetric(
+        privateKeyEncrypted,
+        this.masterKey
+      )
+
+      // Convert to base64
+      privateKeyEncrypted.ct = exports.uInt8ArrayToB64(privateKeyEncrypted.ct)
+      privateKeyEncrypted.iv = exports.uInt8ArrayToB64(privateKeyEncrypted.iv)
+      privateKeyEncrypted.additionalData = exports.uInt8ArrayToB64(
+        privateKeyEncrypted.additionalData
+      )
+
+      let json = JSON.stringify({
+        privateKeyEncrypted,
+        publicKey: await crypto.exportKey('jwk', this.keyPair.publicKey),
+      })
+      return json
+    },
+
+    async fromJSON(json, passphrase, salt) {
+      this.masterKey = await exports.deriveKeyFromPassphrase(passphrase, salt)
+      let { privateKeyEncrypted, publicKey } = JSON.parse(json)
+
+      let { ct, iv, additionalData } = privateKeyEncrypted
+      ct = exports.b64ToUint8Array(ct)
+      iv = exports.b64ToUint8Array(iv)
+      additionalData = exports.b64ToUint8Array(additionalData)
+
+      let privateKey = await exports.decryptSymmetric(
+        ct,
+        this.masterKey,
+        iv,
+        additionalData
+      )
+      privateKey = await crypto.importKey(
+        'pkcs8',
+        privateKey,
+        {
+          name: 'RSA-OAEP',
+          modulusLength: 2048,
+          publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+          hash: { name: 'SHA-256' },
+        },
+        true,
+        ['decrypt', 'unwrapKey']
+      )
+      this.keyPair = { publicKey, privateKey }
+    },
+  }
+
+  exports.Cryptor = Cryptor
 
   return exports
 })

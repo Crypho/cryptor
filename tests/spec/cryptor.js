@@ -5,6 +5,7 @@ describe('cryptor', () => {
     cryptor = window.cryptor
   })
 
+  // Static Cryptor methods
   it('can generate an AES GCM key', done => {
     cryptor.generateSymmetricKey().then(key => {
       expect(key.algorithm.name).toEqual('AES-GCM')
@@ -61,6 +62,45 @@ describe('cryptor', () => {
     const exported = await window.crypto.subtle.exportKey('jwk', key)
     expect(exported.alg).toEqual('A256GCM')
     expect(exported.k).toEqual('uSaTpRqjQPQx4YZqiIHcwruFA2De-5U6Q22xXSvqLZM')
+    done()
+  })
+
+  // Instance methods
+  it('can generate new instance of Cryptor from a passphrase', async done => {
+    let c = new cryptor.Cryptor()
+    await c.generate('password', 'salt')
+    expect(c.keyPair).toBeDefined()
+    expect(c.masterKey).toBeDefined()
+    done()
+  })
+
+  it('can serialize/deserialize an instance of Cryptor', async done => {
+    const c = new cryptor.Cryptor()
+    await c.generate('password', 'salt')
+    const json = await c.toJSON()
+    let c2 = new cryptor.Cryptor()
+    await c2.fromJSON(json, 'password', 'salt')
+
+    // We generate a random key and RSA encrypt it with c.
+    // We then use that key to encrypt a test plain text.
+    // We then decrypt the key with c2 and use it to retrieve the plaintext.
+
+    const pt = 'Hello world'
+    const key = await cryptor.generateSymmetricKey()
+    const wrappedKey = await cryptor.wrapKey(key, c.keyPair.publicKey)
+    const data = await cryptor.encryptSymmetric(pt, key)
+    const unwrappedKey = await cryptor.unwrapKey(
+      wrappedKey,
+      c2.keyPair.privateKey
+    )
+    const dt = await cryptor.decryptSymmetric(
+      data.ct,
+      unwrappedKey,
+      data.iv,
+      data.additionalData
+    )
+
+    expect(new TextDecoder('utf-8').decode(dt)).toEqual(pt)
     done()
   })
 })
