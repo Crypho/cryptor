@@ -57,11 +57,17 @@ describe('cryptor', () => {
     done()
   })
 
-  it('can generate an AES 256-bit key from a passphrase using PBKDF2', async done => {
+  it('can derive an AES 256-bit key from a passphrase using PBKDF2', async done => {
     const key = await cryptor.deriveKeyFromPassphrase('Password', 'salt')
     const exported = await window.crypto.subtle.exportKey('jwk', key)
     expect(exported.alg).toEqual('A256GCM')
     expect(exported.k).toEqual('uSaTpRqjQPQx4YZqiIHcwruFA2De-5U6Q22xXSvqLZM')
+    done()
+  })
+
+  it('can derive an arbitrary number of bits from a passphrase using PBKDF2', async done => {
+    const bits = await cryptor.deriveBitsFromPassphrase('password', 'salt', 64)
+    expect(Array.from(bits)).toEqual([99, 44, 40, 18, 228, 109, 70, 4])
     done()
   })
 

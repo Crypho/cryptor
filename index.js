@@ -103,6 +103,38 @@
       )
     },
 
+    deriveBitsFromPassphrase(passphrase, salt, bits) {
+      if (typeof passphrase === 'string') {
+        passphrase = new TextEncoder('utf-8').encode(passphrase)
+      }
+      if (typeof salt === 'string') {
+        salt = new TextEncoder('utf-8').encode(salt)
+      }
+      return crypto
+        .importKey(
+          'raw',
+          passphrase,
+          {
+            name: 'PBKDF2',
+          },
+          false,
+          ['deriveBits']
+        )
+        .then(baseKey =>
+          crypto.deriveBits(
+            {
+              name: 'PBKDF2',
+              salt,
+              iterations: 1000,
+              hash: { name: 'SHA-256' },
+            },
+            baseKey,
+            bits
+          )
+        )
+        .then(bits => new Uint8Array(bits))
+    },
+
     deriveKeyFromPassphrase(passphrase, salt) {
       if (typeof passphrase === 'string') {
         passphrase = new TextEncoder('utf-8').encode(passphrase)
