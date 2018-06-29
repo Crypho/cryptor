@@ -77,6 +77,7 @@ describe('cryptor', () => {
     await c.generate('password', 'salt')
     expect(c.keyPair).toBeDefined()
     expect(c.masterKey).toBeDefined()
+    expect(c.authBits).toBeDefined()
     done()
   })
 
@@ -86,6 +87,8 @@ describe('cryptor', () => {
     const json = await c.toJSON()
     let c2 = new cryptor.Cryptor()
     await c2.fromJSON(json, 'password', 'salt')
+
+    expect(c.authBits).toEqual(c2.authBits)
 
     // We generate a random key and RSA encrypt it with c.
     // We then use that key to encrypt a test plain text.

@@ -193,7 +193,15 @@
   Cryptor.prototype = {
     async generate(passphrase, salt) {
       this.keyPair = await exports.generateKeypair()
-      this.masterKey = await exports.deriveKeyFromPassphrase(passphrase, salt)
+      const bits = await exports.deriveBitsFromPassphrase(passphrase, salt, 512)
+      this.masterKey = await crypto.importKey(
+        'raw',
+        bits.slice(0, 32).buffer,
+        { name: 'AES-GCM', length: 256 },
+        true,
+        ['encrypt', 'decrypt']
+      )
+      this.authBits = bits.slice(32, 32)
     },
 
     async toJSON() {
@@ -221,7 +229,15 @@
     },
 
     async fromJSON(json, passphrase, salt) {
-      this.masterKey = await exports.deriveKeyFromPassphrase(passphrase, salt)
+      const bits = await exports.deriveBitsFromPassphrase(passphrase, salt, 512)
+      this.masterKey = await crypto.importKey(
+        'raw',
+        bits.slice(0, 32).buffer,
+        { name: 'AES-GCM', length: 256 },
+        true,
+        ['encrypt', 'decrypt']
+      )
+      this.authBits = bits.slice(32, 32)
       let { privateKeyEncrypted, publicKey } = JSON.parse(json)
 
       let { ct, iv, additionalData } = privateKeyEncrypted
