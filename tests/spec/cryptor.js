@@ -71,6 +71,14 @@ describe('cryptor', () => {
     done()
   })
 
+  it('can generate authBits to be used for authentication', async done => {
+    const authBits = await cryptor.generateAuthBits('password', 'salt')
+    let c = new cryptor.Cryptor()
+    await c.generate('password', 'salt')
+    expect(c.authBits).toEqual(authBits)
+    done()
+  })
+
   // Instance methods
   it('can generate new instance of Cryptor from a passphrase', async done => {
     let c = new cryptor.Cryptor()

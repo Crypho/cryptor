@@ -184,6 +184,11 @@
           .map(c => c.charCodeAt(0))
       )
     },
+
+    async generateAuthBits(passphrase, salt) {
+      const bits = await exports.deriveBitsFromPassphrase(passphrase, salt, 512)
+      return bits.slice(32, 32)
+    },
   }
 
   let Cryptor = function() {
