@@ -226,11 +226,11 @@
         privateKeyEncrypted.additionalData
       )
 
-      let json = JSON.stringify({
+      return {
         privateKeyEncrypted,
         publicKey: await crypto.exportKey('jwk', this.keyPair.publicKey),
-      })
-      return json
+        authBits: this.authBits,
+      }
     },
 
     async fromJSON(json, passphrase, salt) {
@@ -243,7 +243,7 @@
         ['encrypt', 'decrypt']
       )
       this.authBits = bits.slice(32, 32)
-      let { privateKeyEncrypted, publicKey } = JSON.parse(json)
+      let { privateKeyEncrypted, publicKey } = json
 
       let { ct, iv, additionalData } = privateKeyEncrypted
       ct = exports.b64ToUint8Array(ct)
@@ -256,6 +256,7 @@
         iv,
         additionalData
       )
+
       privateKey = await crypto.importKey(
         'pkcs8',
         privateKey,
