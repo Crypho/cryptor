@@ -125,7 +125,7 @@
             {
               name: 'PBKDF2',
               salt,
-              iterations: 1000,
+              iterations: 100000,
               hash: { name: 'SHA-256' },
             },
             baseKey,
@@ -158,7 +158,7 @@
             {
               name: 'PBKDF2',
               salt,
-              iterations: 1000,
+              iterations: 100000,
               hash: { name: 'SHA-256' },
             },
             baseKey,

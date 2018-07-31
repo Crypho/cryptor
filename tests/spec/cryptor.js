@@ -61,13 +61,13 @@ describe('cryptor', () => {
     const key = await cryptor.deriveKeyFromPassphrase('Password', 'salt')
     const exported = await window.crypto.subtle.exportKey('jwk', key)
     expect(exported.alg).toEqual('A256GCM')
-    expect(exported.k).toEqual('uSaTpRqjQPQx4YZqiIHcwruFA2De-5U6Q22xXSvqLZM')
+    expect(exported.k).toEqual('_60NZIiD0VOqB-rwzptTLW3S2UBRfXlpItgSxqjLmew')
     done()
   })
 
   it('can derive an arbitrary number of bits from a passphrase using PBKDF2', async done => {
     const bits = await cryptor.deriveBitsFromPassphrase('password', 'salt', 64)
-    expect(Array.from(bits)).toEqual([99, 44, 40, 18, 228, 109, 70, 4])
+    expect(Array.from(bits)).toEqual([3, 148, 162, 237, 227, 50, 201, 161])
     done()
   })
 
