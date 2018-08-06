@@ -1,9 +1,11 @@
 {
   "name": "cryptor",
   "version": "1.0.0",
-  "description": "Crypto helpers",
+  "description": "Crypto helpers for browsers.",
+  "repository": "https://github.com/Crypho/cryptor.git",
+  "bugs": "https://github.com/Crypho/cryptor/issues",
   "main": "index.js",
   "author": "Yiorgis Gozadinos",
-  "license": "Private",
-  "private": true
+  "license": "MIT",
+  "private": false
 }
