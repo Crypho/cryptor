@@ -1,5 +1,5 @@
-import { expect } from "chai"
-import * as cryptor from "../src/index"
+import { expect } from 'chai'
+import * as cryptor from '../src/index'
 
 describe('cryptor', () => {
   // Static Cryptor methods
@@ -27,9 +27,13 @@ describe('cryptor', () => {
     const keyPair = await cryptor.generateKeypair()
     const { publicKey, privateKey } = keyPair
     expect(publicKey.algorithm.name).to.equal('RSA-OAEP')
-    expect((publicKey.algorithm as RsaKeyAlgorithm).modulusLength).to.equal(2048)
+    expect((publicKey.algorithm as RsaKeyAlgorithm).modulusLength).to.equal(
+      2048
+    )
     expect(privateKey.algorithm.name).to.equal('RSA-OAEP')
-    expect((privateKey.algorithm as RsaKeyAlgorithm).modulusLength).to.equal(2048)
+    expect((privateKey.algorithm as RsaKeyAlgorithm).modulusLength).to.equal(
+      2048
+    )
   })
 
   it('can wrap/unwrap an AES-GCM key using RSA-OAEP', async () => {
@@ -57,7 +61,16 @@ describe('cryptor', () => {
 
   it('can derive an arbitrary number of bits from a passphrase using PBKDF2', async () => {
     const bits = await cryptor.deriveBitsFromPassphrase('password', 'salt', 64)
-    expect(Array.from(bits)).to.deep.equal([3, 148, 162, 237, 227, 50, 201, 161])
+    expect(Array.from(bits)).to.deep.equal([
+      3,
+      148,
+      162,
+      237,
+      227,
+      50,
+      201,
+      161,
+    ])
   })
 
   it('can generate authBits to be used for authentication', async () => {
