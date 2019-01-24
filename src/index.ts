@@ -51,7 +51,7 @@ const KEY_WRAP_ALGORITHM: RsaHashedKeyAlgorithm = {
  *
  * @param input Data to convert. If this is a string it is UTF-8 encoded.
  */
-const toUint8Array = (input: string | Uint8Array): Uint8Array =>
+const toUint8Array = (input: string | Uint8Array) =>
   typeof input === 'string' ? new TextEncoder().encode(input) : input
 
 export function generateSymmetricKey() {
@@ -65,29 +65,23 @@ export function generateSymmetricKey() {
   )
 }
 
-export function encryptSymmetric(
-  pt: string | Uint8Array,
-  key: CryptoKey
-): PromiseLike<IJSONCryptoKey> {
+export async function encryptSymmetric(pt: string | Uint8Array, key: CryptoKey): Promise<IJSONCryptoKey> {
   const iv = crypto.getRandomValues(new Uint8Array(12))
   const additionalData = crypto.getRandomValues(new Uint8Array(12))
-  return crypto.subtle
-    .encrypt(
-      {
-        ...SYMMETRIC_KEY_PARAMETERS,
-        iv,
-        additionalData,
-      } as AesGcmParams,
-      key,
-      toUint8Array(pt)
-    )
-    .then(ct => {
-      return {
-        ct: new Uint8Array(ct),
-        iv,
-        additionalData,
-      }
-    })
+  const ct = await crypto.subtle.encrypt(
+    {
+      ...SYMMETRIC_KEY_PARAMETERS,
+      iv,
+      additionalData,
+    } as AesGcmParams,
+    key,
+    toUint8Array(pt)
+  )
+  return {
+    ct: new Uint8Array(ct),
+    iv,
+    additionalData,
+  }
 }
 
 export function decryptSymmetric(
@@ -119,10 +113,7 @@ export function wrapKey(key: CryptoKey, publicKey: CryptoKey) {
   return crypto.subtle.wrapKey('raw', key, publicKey, KEY_WRAP_ALGORITHM)
 }
 
-export function unwrapKey(
-  wrapped: ArgumentsType<SubtleCrypto['unwrapKey']>[1],
-  privateKey: CryptoKey
-) {
+export function unwrapKey(wrapped: ArgumentsType<SubtleCrypto['unwrapKey']>[1], privateKey: CryptoKey) {
   return crypto.subtle.unwrapKey(
     'raw',
     wrapped,
@@ -134,64 +125,58 @@ export function unwrapKey(
   )
 }
 
-export function deriveBitsFromPassphrase(
+export async function deriveBitsFromPassphrase(
   passphrase: string | Uint8Array,
   salt: string | Uint8Array,
   bits: number
-) {
-  return crypto.subtle
-    .importKey(
-      'raw',
-      toUint8Array(passphrase),
-      {
-        name: 'PBKDF2',
-      } as Pbkdf2Params,
-      false,
-      ['deriveBits']
-    )
-    .then(baseKey =>
-      crypto.subtle.deriveBits(
-        {
-          name: 'PBKDF2',
-          salt: toUint8Array(salt),
-          iterations: 100000,
-          hash: { name: 'SHA-256' },
-        } as Pbkdf2Params,
-        baseKey,
-        bits
-      )
-    )
-    .then(derivedBits => new Uint8Array(derivedBits))
+): Promise<Uint8Array> {
+  const baseKey = await crypto.subtle.importKey(
+    'raw',
+    toUint8Array(passphrase),
+    {
+      name: 'PBKDF2',
+    } as Pbkdf2Params,
+    false,
+    ['deriveBits']
+  )
+  const derivedBits = await crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      salt: toUint8Array(salt),
+      iterations: 100000,
+      hash: { name: 'SHA-256' },
+    } as Pbkdf2Params,
+    baseKey,
+    bits
+  )
+  return new Uint8Array(derivedBits)
 }
 
-export function deriveKeyFromPassphrase(
+export async function deriveKeyFromPassphrase(
   passphrase: string | Uint8Array,
   salt: string | Uint8Array
-) {
-  return crypto.subtle
-    .importKey(
-      'raw',
-      toUint8Array(passphrase),
-      {
-        name: 'PBKDF2',
-      } as Pbkdf2Params,
-      false,
-      ['deriveKey']
-    )
-    .then(baseKey =>
-      crypto.subtle.deriveKey(
-        {
-          name: 'PBKDF2',
-          salt: toUint8Array(salt),
-          iterations: 100000,
-          hash: { name: 'SHA-256' },
-        } as Pbkdf2Params,
-        baseKey,
-        { name: 'AES-GCM', length: 256 },
-        true,
-        ['encrypt', 'decrypt']
-      )
-    )
+): Promise<CryptoKey> {
+  const baseKey = await crypto.subtle.importKey(
+    'raw',
+    toUint8Array(passphrase),
+    {
+      name: 'PBKDF2',
+    } as Pbkdf2Params,
+    false,
+    ['deriveKey']
+  )
+  return crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: toUint8Array(salt),
+      iterations: 100000,
+      hash: { name: 'SHA-256' },
+    } as Pbkdf2Params,
+    baseKey,
+    { name: 'AES-GCM', length: 256 },
+    true,
+    ['encrypt', 'decrypt']
+  )
 }
 
 export function uInt8ArrayToB64(array: Uint8Array) {
@@ -210,10 +195,7 @@ export function b64ToUint8Array(b64: string) {
   )
 }
 
-export async function generateAuthBits(
-  passphrase: string | Uint8Array,
-  salt: string | Uint8Array
-) {
+export async function generateAuthBits(passphrase: string | Uint8Array, salt: string | Uint8Array) {
   const bits = await deriveBitsFromPassphrase(passphrase, salt, 512)
   return bits.slice(32, 32)
 }
@@ -223,10 +205,7 @@ export class Cryptor {
   public keyPair: CryptoKeyPair
   public masterKey: CryptoKey
 
-  public async generate(
-    passphrase: string | Uint8Array,
-    salt: string | Uint8Array
-  ) {
+  public async generate(passphrase: string | Uint8Array, salt: string | Uint8Array) {
     this.keyPair = await generateKeypair()
     const bits = await deriveBitsFromPassphrase(passphrase, salt, 512)
     this.masterKey = await crypto.subtle.importKey(
@@ -240,10 +219,7 @@ export class Cryptor {
   }
 
   public async toJSON(): Promise<ICryptorKeyPair> {
-    const key = (await crypto.subtle.exportKey(
-      'pkcs8',
-      this.keyPair.privateKey
-    )) as Uint8Array
+    const key = (await crypto.subtle.exportKey('pkcs8', this.keyPair.privateKey)) as Uint8Array
 
     const privateKeyEncrypted = await encryptSymmetric(key, this.masterKey)
 
@@ -260,11 +236,7 @@ export class Cryptor {
     }
   }
 
-  public async fromJSON(
-    json: ICryptorKeyPair,
-    passphrase: string | Uint8Array,
-    salt: string | Uint8Array
-  ) {
+  public async fromJSON(json: ICryptorKeyPair, passphrase: string | Uint8Array, salt: string | Uint8Array) {
     const bits = await deriveBitsFromPassphrase(passphrase, salt, 512)
     this.masterKey = await crypto.subtle.importKey(
       'raw',
@@ -280,26 +252,15 @@ export class Cryptor {
     const iv = b64ToUint8Array(privateKeyEncrypted.iv)
     const additionalData = b64ToUint8Array(privateKeyEncrypted.additionalData)
 
-    const decryptedKey = await decryptSymmetric(
-      ct,
-      this.masterKey,
-      iv,
-      additionalData
-    )
+    const decryptedKey = await decryptSymmetric(ct, this.masterKey, iv, additionalData)
 
-    const publicKey = await crypto.subtle.importKey(
-      'jwk',
-      json.publicKey,
-      ASYMMETRIC_KEY_ALGORITHM,
-      true,
-      []
-    )
+    const publicKey = await crypto.subtle.importKey('jwk', json.publicKey, ASYMMETRIC_KEY_ALGORITHM, true, ['wrapKey'])
     const privateKey = await crypto.subtle.importKey(
       'pkcs8',
       decryptedKey,
       ASYMMETRIC_KEY_ALGORITHM as RsaHashedImportParams,
       true,
-      ['decrypt', 'unwrapKey']
+      ['unwrapKey']
     )
     this.keyPair = { publicKey, privateKey }
   }
