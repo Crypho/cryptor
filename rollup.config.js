@@ -1,9 +1,9 @@
-import typescript from 'rollup-plugin-typescript2';
-import resolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
-import pkg from './package.json';
+import typescript from 'rollup-plugin-typescript2'
+import resolve from 'rollup-plugin-node-resolve'
+import commonjs from 'rollup-plugin-commonjs'
+import pkg from './package.json'
 
-const defaultOptions = (tsConfig={}) => ({
+const defaultOptions = (tsConfig = {}) => ({
   plugins: [
     resolve(),
     commonjs({
@@ -11,10 +11,9 @@ const defaultOptions = (tsConfig={}) => ({
         'node_modules/chai/index.js': ['expect'],
       },
     }),
-    typescript({tsconfigOverride: 'tsConfig'}),
-  ]
+    typescript({ tsconfigOverride: 'tsConfig' }),
+  ],
 })
-
 
 export default [
   // Browser-friendly UMD build
@@ -22,7 +21,7 @@ export default [
     input: 'src/index.ts',
     output: {
       format: 'umd',
-      name: "cryptor",
+      name: 'cryptor',
       file: pkg.browser,
     },
     ...defaultOptions(),
@@ -34,9 +33,9 @@ export default [
     output: [
       {
         file: pkg.main,
-        format: "cjs",
+        format: 'cjs',
       },
-      { file: pkg.module, format: 'es'},
+      { file: pkg.module, format: 'es' },
     ],
     ...defaultOptions(),
   },
@@ -46,9 +45,9 @@ export default [
     input: 'test/index.ts',
     output: {
       name: 'cryptorTest',
-      file: 'test/index.js',
+      file: 'build/test/index.js',
       format: 'iife',
-      sourcemap: true
+      sourcemap: true,
     },
     ...defaultOptions({
       compilerOptions: {

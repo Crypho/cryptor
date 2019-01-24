@@ -11,7 +11,7 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "build": "./node_modules/.bin/rollup  -c rollup.config.js",
+    "build": "rollup  -c rollup.config.js",
     "lint": "tslint src/**/*.ts tests/**/*.ts"
   },
   "devDependencies": {
