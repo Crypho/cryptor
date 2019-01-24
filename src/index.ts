@@ -27,25 +27,16 @@ type ArgumentsType<T> = T extends (...args: infer A) => any ? A : never;
   const MASTER_KEY_USAGES: KeyUsage[] = ['encrypt', 'decrypt']
   const MASTER_KEY_ALGORITHM: AesKeyAlgorithm = { name: 'AES-GCM', length: 256 }
 
-  const SYMMETRIC_KEY_USAGES: KeyUsage[] = ["decrypt", "encrypt", "unwrapKey"]
-  const SYMMETRIC_KEY_ALGORITHM: RsaHashedKeyAlgorithm = {
-      name: 'RSA-OAEP',
-      modulusLength: 2048,
-      publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
-      hash: { name: 'SHA-256' },
+  const SYMMETRIC_KEY_PARAMETERS = {
+      name: 'AES-GCM',
+      tagLength: 128,
   }
-
-  const ASYMMETRIC_KEY_USAGES: KeyUsage[] = ['wrapKey', 'wrapKey']
+  const ASYMMETRIC_KEY_USAGES: KeyUsage[] = ['wrapKey', 'unwrapKey']
   const ASYMMETRIC_KEY_ALGORITHM: RsaHashedKeyAlgorithm = {
     name: 'RSA-OAEP',
     modulusLength: 2048,
     publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
     hash: { name: 'SHA-256' },
-  }
-
-  const SYMMETRIC_ENCRYPTION_ALGORITHM = {
-    name: 'AES-GCM',
-    tagLength: 128,
   }
 
   const KEY_WRAP_ALGORITHM: RsaHashedKeyAlgorithm = {
@@ -79,7 +70,7 @@ type ArgumentsType<T> = T extends (...args: infer A) => any ? A : never;
       const additionalData = crypto.getRandomValues(new Uint8Array(12))
       return crypto.subtle.encrypt(
           {
-            ...SYMMETRIC_ENCRYPTION_ALGORITHM,
+            ...SYMMETRIC_KEY_PARAMETERS,
             iv,
             additionalData,
           } as AesGcmParams,
@@ -98,10 +89,10 @@ type ArgumentsType<T> = T extends (...args: infer A) => any ? A : never;
     export function decryptSymmetric(ct: ArgumentsType<SubtleCrypto['decrypt']>[2], key: CryptoKey, iv: AesGcmParams['iv'], additionalData: AesGcmParams['additionalData']) {
       return crypto.subtle.decrypt(
         {
-          ...SYMMETRIC_ENCRYPTION_ALGORITHM,
+          ...SYMMETRIC_KEY_PARAMETERS,
           iv,
           additionalData,
-        },
+        } as AesGcmParams,
         key,
         ct
       )
@@ -124,9 +115,9 @@ type ArgumentsType<T> = T extends (...args: infer A) => any ? A : never;
         wrapped,
         privateKey,
         KEY_WRAP_ALGORITHM,
-        SYMMETRIC_KEY_ALGORITHM,
+        MASTER_KEY_ALGORITHM,
         true,
-        SYMMETRIC_KEY_USAGES
+        MASTER_KEY_USAGES
       )
     }
 
@@ -269,17 +260,14 @@ export class Cryptor {
         additionalData
       )
 
-      const publicKey = await  crypto.subtle.importKey("jwk", json.publicKey, ASYMMETRIC_KEY_ALGORITHM, true, ASYMMETRIC_KEY_USAGES)
+      const publicKey = await  crypto.subtle.importKey("jwk", json.publicKey, ASYMMETRIC_KEY_ALGORITHM, true, [])
       const privateKey = await crypto.subtle.importKey(
         'pkcs8',
         decryptedKey,
-        SYMMETRIC_KEY_ALGORITHM as RsaHashedImportParams,
+        ASYMMETRIC_KEY_ALGORITHM as RsaHashedImportParams,
         true,
-        SYMMETRIC_KEY_USAGES
+        ['decrypt', 'unwrapKey'],
       )
       this.keyPair = { publicKey, privateKey }
     }
   }
-
-  export default Cryptor
-  

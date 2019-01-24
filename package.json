@@ -4,21 +4,25 @@
   "description": "Crypto helpers for browsers.",
   "repository": "https://github.com/Crypho/cryptor.git",
   "bugs": "https://github.com/Crypho/cryptor/issues",
-  "main": "src/index.js",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "browser": "dist/browser.js",
   "author": "Yiorgis Gozadinos",
   "license": "MIT",
   "private": false,
   "scripts": {
-    "build": "tsc",
-    "build:test": "babel test --out-dir ./dist-test --source-maps",
-    "test": "./node_modules/.bin/mocha --require @babel/register --require @babel/polyfill"
+    "build": "./node_modules/.bin/rollup  -c rollup.config.js"
   },
   "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.5",
     "chai": "^4.2.0",
     "mocha": "^5.2.0",
-    "typescript": "^3.2.4",
-    "@types/chai": "^4.1.7",
-    "@types/mocha": "^5.2.5"
+    "rollup": "^1.1.2",
+    "rollup-plugin-commonjs": "^9.2.0",
+    "rollup-plugin-node-resolve": "^4.0.0",
+    "rollup-plugin-typescript2": "^0.19.2",
+    "typescript": "^3.2.4"
   },
   "dependencies": {}
 }

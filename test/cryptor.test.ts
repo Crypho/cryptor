@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import * as cryptor from "./index"
+import * as cryptor from "../src/index"
 
 describe('cryptor', () => {
   // Static Cryptor methods
@@ -57,14 +57,14 @@ describe('cryptor', () => {
 
   it('can derive an arbitrary number of bits from a passphrase using PBKDF2', async () => {
     const bits = await cryptor.deriveBitsFromPassphrase('password', 'salt', 64)
-    expect(Array.from(bits)).to.equal([3, 148, 162, 237, 227, 50, 201, 161])
+    expect(Array.from(bits)).to.deep.equal([3, 148, 162, 237, 227, 50, 201, 161])
   })
 
   it('can generate authBits to be used for authentication', async () => {
     const authBits = await cryptor.generateAuthBits('password', 'salt')
     let c = new cryptor.Cryptor()
     await c.generate('password', 'salt')
-    expect(c.authBits).to.equal(authBits)
+    expect(c.authBits).to.deep.equal(authBits)
   })
 
   // Instance methods
@@ -83,12 +83,11 @@ describe('cryptor', () => {
     let c2 = new cryptor.Cryptor()
     await c2.fromJSON(json, 'password', 'salt')
 
-    expect(c.authBits).to.equal(c2.authBits)
+    expect(c.authBits).to.deep.equal(c2.authBits)
 
     // We generate a random key and RSA encrypt it with c.
     // We then use that key to encrypt a test plain text.
     // We then decrypt the key with c2 and use it to retrieve the plaintext.
-
     const pt = 'Hello world'
     const key = await cryptor.generateSymmetricKey()
     const wrappedKey = await cryptor.wrapKey(key, c.keyPair.publicKey)
@@ -104,6 +103,6 @@ describe('cryptor', () => {
       data.additionalData
     )
 
-    expect(new TextDecoder('utf-8').decode(dt)).to.equal(pt)
+    expect(new TextDecoder().decode(dt)).to.equal(pt)
   })
 })

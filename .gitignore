@@ -1,2 +1,8 @@
 /dist
 /node_modules
+/.rpt2_cache
+*.map
+*.js
+*.d.ts
+/test/src
+/test/test
