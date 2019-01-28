@@ -1,6 +1,6 @@
+/build
 /dist
 /node_modules
 /.rpt2_cache
 *.map
-*.js
 *.d.ts
