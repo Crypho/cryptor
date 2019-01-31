@@ -1,0 +1,23 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: circleci/node:10-browsers
+    steps:
+      - checkout
+      - run:
+          name: Install everything
+          command: npm ci
+      - run:
+          name: Generate bundles
+          command: npm run build
+      - run:
+          name: Run tests
+          command: |
+            for browser in chrome firefox ; do
+              SELENIUM_BROWSER=$browser npm run test
+            done
+      - run:
+          name: Lint
+          command: npm run lint

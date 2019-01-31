@@ -1,20 +1,22 @@
-
 <html>
-<head>
-    <meta charset="utf-8">
+  <head>
+    <meta charset="utf-8" />
     <title>Mocha Tests</title>
     <link href="https://unpkg.com/mocha@4.0.1/mocha.css" rel="stylesheet" />
-</head>
-<body>
-<div id="mocha"></div>
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <script src="https://cdn.rawgit.com/mochajs/mocha/2.2.5/mocha.js"></script>
+    <script>
+      mocha.setup('bdd')
+    </script>
 
-<script src="https://cdn.rawgit.com/mochajs/mocha/2.2.5/mocha.js"></script>
-<script>mocha.setup('bdd')</script>
-
-<script src="../build/test/index.js"></script>
-<script>
-    mocha.checkLeaks();
-    mocha.run();
-</script>
-</body>
+    <script src="../build/test/index.js"></script>
+    <script>
+      mocha.checkLeaks()
+      mocha.run(() => {
+        window.testComplete = true
+      })
+    </script>
+  </body>
 </html>
