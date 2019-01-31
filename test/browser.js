@@ -14,9 +14,10 @@ async function getCount(driver, category) {
 }
 
 async function runTests() {
-  const driver = new webdriver.Builder().forBrowser('chrome').build()
+  let browser = process.env.SELENIUM_BROWSER || 'chrome'
+  const driver = new webdriver.Builder().forBrowser(browser).build()
   try {
-    console.log(`Running tests from ${testUrl}`)
+    console.log(`Running tests from ${testUrl} on ${browser}`)
     await driver.get(testUrl)
     await driver.wait(testsFinished())
 
@@ -36,7 +37,7 @@ async function runTests() {
     console.log(`Passes: ${passes}`)
     console.log(`Failures: ${failures}`)
 
-    if (failures) {
+    if (failures>0) {
       process.exitCode = 1
     }
   } finally {

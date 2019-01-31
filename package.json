@@ -12,7 +12,8 @@
   "private": false,
   "scripts": {
     "build": "rollup  -c rollup.config.js",
-    "lint": "tslint src/**/*.ts tests/**/*.ts"
+    "lint": "tslint src/**/*.ts test/**/*.ts",
+    "test": "node test/browser.js"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
