@@ -33,7 +33,7 @@ let c2 = new cryptor.Cryptor()
 await c2.fromJSON(json, 'password', 'salt')
 ```
 
-## Encryptiion/decryption
+## Encryption/decryption
 
 Cryptor uses AES-GCM for encryption/decryption.
 
