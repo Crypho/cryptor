@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import * as cryptor from '../src/index'
+import * as cryptor from './index'
 
 // tslint:disable:no-unused-expression
 

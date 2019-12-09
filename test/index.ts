@@ -1,1 +1,1 @@
-import './cryptor.test'
+import '../src/cryptor.test'
