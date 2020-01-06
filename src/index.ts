@@ -34,14 +34,14 @@ const SYMMETRIC_KEY_PARAMETERS = {
 const ASYMMETRIC_KEY_USAGES: KeyUsage[] = ['wrapKey', 'unwrapKey']
 const ASYMMETRIC_KEY_ALGORITHM: RsaHashedKeyAlgorithm = {
   name: 'RSA-OAEP',
-  modulusLength: 2048,
+  modulusLength: 4096,
   publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
   hash: { name: 'SHA-512' },
 }
 
 const KEY_WRAP_ALGORITHM: RsaHashedKeyAlgorithm = {
   name: 'RSA-OAEP',
-  modulusLength: 2048,
+  modulusLength: 4096,
   publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
   hash: { name: 'SHA-512' },
 }

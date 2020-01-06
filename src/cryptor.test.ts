@@ -24,10 +24,10 @@ describe('cryptor', () => {
     const keyPair = await cryptor.generateKeypair()
     const { publicKey, privateKey } = keyPair
     expect(publicKey.algorithm.name).to.equal('RSA-OAEP')
-    expect((publicKey.algorithm as RsaKeyAlgorithm).modulusLength).to.equal(2048)
+    expect((publicKey.algorithm as RsaKeyAlgorithm).modulusLength).to.equal(4096)
     expect(privateKey.algorithm.name).to.equal('RSA-OAEP')
-    expect((privateKey.algorithm as RsaKeyAlgorithm).modulusLength).to.equal(2048)
-  })
+    expect((privateKey.algorithm as RsaKeyAlgorithm).modulusLength).to.equal(4096)
+  }).timeout(5000)
 
   it('can wrap/unwrap an AES-GCM key using RSA-OAEP', async () => {
     const pt = 'Hello world'
@@ -38,7 +38,7 @@ describe('cryptor', () => {
     const unwrapped = await cryptor.unwrapKey(wrapped, keyPair.privateKey)
     const dt = await cryptor.decryptSymmetric(data.ct, unwrapped, data.iv, data.additionalData)
     expect(new TextDecoder('utf-8').decode(dt)).to.equal(pt)
-  })
+  }).timeout(5000)
 
   it('can derive an AES 256-bit key from a passphrase using PBKDF2', async () => {
     const key = await cryptor.deriveKeyFromPassphrase('Password', 'salt')
@@ -57,7 +57,7 @@ describe('cryptor', () => {
     const c = new cryptor.Cryptor()
     await c.generate('password', 'salt')
     expect(c.authBits).to.deep.equal(authBits)
-  })
+  }).timeout(5000)
 
   // Instance methods
   it('can generate new instance of Cryptor from a passphrase', async () => {
@@ -66,7 +66,7 @@ describe('cryptor', () => {
     expect(c.keyPair).to.not.be.undefined
     expect(c.masterKey).to.not.be.undefined
     expect(c.authBits).to.not.be.undefined
-  })
+  }).timeout(5000)
 
   it('can serialize/deserialize an instance of Cryptor', async () => {
     const c = new cryptor.Cryptor()
