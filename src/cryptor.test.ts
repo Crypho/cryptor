@@ -44,12 +44,12 @@ describe('cryptor', () => {
     const key = await cryptor.deriveKeyFromPassphrase('Password', 'salt')
     const exported = await window.crypto.subtle.exportKey('jwk', key)
     expect(exported.alg).to.equal('A256GCM')
-    expect(exported.k).to.equal('_60NZIiD0VOqB-rwzptTLW3S2UBRfXlpItgSxqjLmew')
+    expect(exported.k).to.equal('rWPXMD2Km3jBCVOWos7ZY4yipFUbvsqpJG99UURyko0')
   })
 
   it('can derive an arbitrary number of bits from a passphrase using PBKDF2', async () => {
     const bits = await cryptor.deriveBitsFromPassphrase('password', 'salt', 64)
-    expect(Array.from(bits)).to.deep.equal([3, 148, 162, 237, 227, 50, 201, 161])
+    expect(Array.from(bits)).to.deep.equal([245, 209, 112, 34, 201, 106, 244, 108])
   })
 
   it('can generate authBits to be used for authentication', async () => {

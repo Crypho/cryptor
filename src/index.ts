@@ -36,14 +36,14 @@ const ASYMMETRIC_KEY_ALGORITHM: RsaHashedKeyAlgorithm = {
   name: 'RSA-OAEP',
   modulusLength: 2048,
   publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
-  hash: { name: 'SHA-256' },
+  hash: { name: 'SHA-512' },
 }
 
 const KEY_WRAP_ALGORITHM: RsaHashedKeyAlgorithm = {
   name: 'RSA-OAEP',
   modulusLength: 2048,
   publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
-  hash: { name: 'SHA-256' },
+  hash: { name: 'SHA-512' },
 }
 
 /**
@@ -144,7 +144,7 @@ export async function deriveBitsFromPassphrase(
       name: 'PBKDF2',
       salt: toUint8Array(salt),
       iterations: 100000,
-      hash: { name: 'SHA-256' },
+      hash: { name: 'SHA-512' },
     } as Pbkdf2Params,
     baseKey,
     bits
@@ -170,7 +170,7 @@ export async function deriveKeyFromPassphrase(
       name: 'PBKDF2',
       salt: toUint8Array(salt),
       iterations: 100000,
-      hash: { name: 'SHA-256' },
+      hash: { name: 'SHA-512' },
     } as Pbkdf2Params,
     baseKey,
     { name: 'AES-GCM', length: 256 },
