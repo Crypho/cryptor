@@ -16,20 +16,20 @@
     "test": "node test/browser.js"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.7",
-    "@types/mocha": "^5.2.7",
+    "@types/chai": "^4.2.11",
+    "@types/mocha": "^7.0.2",
     "chai": "^4.2.0",
-    "mocha": "^7.0.0",
-    "prettier": "^1.19.1",
-    "rollup": "^1.29.1",
+    "mocha": "^7.1.1",
+    "prettier": "^2.0.2",
+    "rollup": "^2.3.2",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-typescript2": "^0.25.3",
-    "selenium-webdriver": "^4.0.0-alpha.5",
-    "tslint": "^5.20.1",
+    "rollup-plugin-typescript2": "^0.27.0",
+    "selenium-webdriver": "^4.0.0-alpha.7",
+    "tslint": "^6.1.1",
     "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^9.0.0",
-    "typescript": "^3.7.4"
+    "typescript": "^3.8.3"
   },
   "dependencies": {}
 }
